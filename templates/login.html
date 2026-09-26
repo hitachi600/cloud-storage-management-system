@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Cloud Storage Management System{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">
+                <i class="fa-solid fa-right-to-bracket"></i>
+            </div>
+            <h2>Welcome Back</h2>
+            <p>Sign in to access your cloud files and storage</p>
+        </div>
+
+        <div id="auth-alert" class="alert alert-danger" style="display: none;"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label class="form-label" for="login-email"><i class="fa-regular fa-envelope"></i> Email Address</label>
+                <input type="email" id="login-email" class="form-control" placeholder="jane@example.com" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+                <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="btn-submit-login">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Don't have an account yet? <a href="{{ url_for('pages.register_page') }}">Register Here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

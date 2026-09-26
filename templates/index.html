@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Cloud Storage Management System - Home{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-pill">
+        <i class="fa-solid fa-bolt"></i> Cloud Computing Academic &amp; Mini-Project
+    </div>
+    <h1 class="hero-title">
+        Secure, Scalable &amp; Intelligent <br>
+        <span class="gradient-text">Cloud Storage System</span>
+    </h1>
+    <p class="hero-desc">
+        A complete cloud-native web application designed to store, manage, and retrieve your files securely with seamless switching between <strong>Local Disk Storage</strong> and <strong>Amazon Web Services (AWS S3)</strong>.
+    </p>
+
+    <div class="hero-cta">
+        <a href="{{ url_for('pages.register_page') }}" class="btn btn-primary btn-lg" id="hero-btn-register">
+            <i class="fa-solid fa-rocket"></i> Create Free Account
+        </a>
+        <a href="{{ url_for('pages.login_page') }}" class="btn btn-secondary btn-lg" id="hero-btn-login">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Login to Portal
+        </a>
+    </div>
+</div>
+
+<!-- Architecture & Features Highlights -->
+<div class="features-grid">
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fa-brands fa-aws"></i>
+        </div>
+        <h3>AWS S3 &amp; Local Storage</h3>
+        <p>
+            Pluggable dual-mode storage service. Develop locally without an AWS account, or plug in your S3 bucket credentials for instant cloud deployment.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3>Secure Authentication</h3>
+        <p>
+            Cryptographically secure password hashing (Werkzeug PBKDF2), session isolation, and per-user permission validation for all file assets.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fa-solid fa-gauge-high"></i>
+        </div>
+        <h3>Live Storage Analytics</h3>
+        <p>
+            Interactive dashboard visualizing storage quota consumption, file extension breakdowns, and upload history in real-time.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">
+            <i class="fa-solid fa-database"></i>
+        </div>
+        <h3>SQLAlchemy &amp; RDS Ready</h3>
+        <p>
+            Relational metadata schema mapping users to file records with UUID collision avoidance, ready for seamless migration to AWS RDS.
+        </p>
+    </div>
+</div>
+{% endblock %}

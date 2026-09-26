@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Cloud Storage Management System{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1 style="font-size: 2rem;">Welcome back, <span class="gradient-text">{{ current_user_name }}</span>!</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.25rem;">
+            Here is your cloud storage overview and file activity summary.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('pages.upload_page') }}" class="btn btn-primary" id="dash-btn-upload">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload New File
+        </a>
+        <a href="{{ url_for('pages.files_page') }}" class="btn btn-secondary" id="dash-btn-files">
+            <i class="fa-solid fa-folder-open"></i> Browse Files
+        </a>
+    </div>
+</div>
+
+<!-- Metrics Cards Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-primary">
+            <i class="fa-solid fa-file-lines"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Total Files</div>
+            <div class="stat-value" id="stat-total-files">--</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-cyan">
+            <i class="fa-solid fa-database"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Storage Used</div>
+            <div class="stat-value" id="stat-storage-used">--</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-emerald">
+            <i class="fa-solid fa-server"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Storage Engine</div>
+            <div class="stat-value" style="font-size: 1.25rem; text-transform: uppercase;" id="stat-storage-mode">{{ storage_mode }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-amber">
+            <i class="fa-solid fa-pie-chart"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-label">Quota Usage</div>
+            <div class="stat-value" id="stat-quota-percent">--%</div>
+        </div>
+    </div>
+</div>
+
+<!-- Storage Quota Progress Bar -->
+<div class="storage-progress-container">
+    <div class="progress-header">
+        <span><i class="fa-solid fa-hard-drive"></i> Storage Consumption (Free Tier Quota)</span>
+        <span id="quota-text">Loading storage metrics...</span>
+    </div>
+    <div class="progress-bar-bg">
+        <div id="storage-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+    </div>
+</div>
+
+<!-- Recent Files Table -->
+<div class="table-container">
+    <div class="table-toolbar">
+        <h3 style="font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Recent Uploads
+        </h3>
+        <a href="{{ url_for('pages.files_page') }}" class="btn btn-secondary btn-sm">
+            View All Files <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div id="recent-files-wrapper">
+        <table class="data-table" id="recent-files-table">
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Type</th>
+                    <th>Size</th>
+                    <th>Upload Date</th>
+                    <th>Storage Mode</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="recent-files-body">
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Loading recent files...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

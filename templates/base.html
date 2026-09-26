@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cloud Storage Management System{% endblock %}</title>
+    <meta name="description" content="A beginner-friendly and professional Cloud Storage Management System supporting Local Storage and AWS S3 integration.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <a href="{{ url_for('pages.home') }}" class="nav-brand" id="nav-brand-link">
+            <div class="brand-icon">
+                <i class="fa-solid fa-cloud"></i>
+            </div>
+            <span>CloudVault</span>
+        </a>
+
+        <ul class="nav-links">
+            {% if is_authenticated %}
+                <li>
+                    <span class="nav-badge-mode {% if storage_mode == 's3' %}mode-s3{% else %}mode-local{% endif %}">
+                        <i class="fa-solid {% if storage_mode == 's3' %}fa-cubes{% else %}fa-hard-drive{% endif %}"></i>
+                        {{ storage_mode|upper }} MODE
+                    </span>
+                </li>
+                <li>
+                    <a href="{{ url_for('pages.dashboard_page') }}" class="nav-link {% if request.endpoint == 'pages.dashboard_page' %}active{% endif %}" id="nav-dashboard">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('pages.upload_page') }}" class="nav-link {% if request.endpoint == 'pages.upload_page' %}active{% endif %}" id="nav-upload">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('pages.files_page') }}" class="nav-link {% if request.endpoint == 'pages.files_page' %}active{% endif %}" id="nav-files">
+                        <i class="fa-solid fa-folder-open"></i> My Files
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('pages.logout_action') }}" class="nav-link" id="nav-logout" style="color: #F87171;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout ({{ current_user_name }})
+                    </a>
+                </li>
+            {% else %}
+                <li>
+                    <span class="nav-badge-mode mode-local">
+                        <i class="fa-solid fa-hard-drive"></i> LOCAL / AWS S3
+                    </span>
+                </li>
+                <li>
+                    <a href="{{ url_for('pages.login_page') }}" class="nav-link" id="nav-login">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('pages.register_page') }}" class="btn btn-primary btn-sm" id="nav-register">
+                        <i class="fa-solid fa-user-plus"></i> Get Started
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Main Content Body -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Cloud Storage Management System | Built with Flask, SQLite &amp; AWS S3 Architecture</p>
+    </footer>
+
+    <!-- Global Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

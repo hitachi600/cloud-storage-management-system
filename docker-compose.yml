@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  cloud-storage-app:
+    build: .
+    container_name: cloud_storage_system
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=cloud-storage-secret-key-2026-super-secure
+      - STORAGE_TYPE=local
+      - DATABASE_URI=sqlite:///instance/cloud_storage.db
+      - MAX_CONTENT_LENGTH=16777216
+    volumes:
+      - ./instance:/app/instance
+      - ./uploads:/app/uploads
+    restart: unless-stopped

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Cloud Storage Management System{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="brand-icon" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h2>Create Account</h2>
+            <p>Register to start storing files in the cloud</p>
+        </div>
+
+        <div id="auth-alert" class="alert alert-danger" style="display: none;"></div>
+
+        <form id="register-form">
+            <div class="form-group">
+                <label class="form-label" for="reg-name"><i class="fa-regular fa-user"></i> Full Name</label>
+                <input type="text" id="reg-name" class="form-control" placeholder="Jane Doe" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reg-email"><i class="fa-regular fa-envelope"></i> Email Address</label>
+                <input type="email" id="reg-email" class="form-control" placeholder="jane@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reg-password"><i class="fa-solid fa-lock"></i> Password</label>
+                <input type="password" id="reg-password" class="form-control" placeholder="At least 6 characters" required minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reg-confirm-password"><i class="fa-solid fa-shield-check"></i> Confirm Password</label>
+                <input type="password" id="reg-confirm-password" class="form-control" placeholder="Re-enter your password" required minlength="6">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="btn-submit-register">
+                <i class="fa-solid fa-user-check"></i> Complete Registration
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Already have an account? <a href="{{ url_for('pages.login_page') }}">Sign In</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}
