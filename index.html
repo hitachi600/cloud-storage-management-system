@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Storage Management System — Live AWS S3 Demo</title>
+    <meta name="description" content="Production-grade Cloud Storage Web Application built with Python, AWS S3, Boto3, and S3 Presigned URLs.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 4rem 1rem;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            color: #ffffff;
+            box-shadow: var(--shadow-glow);
+        }
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .badge-live-demo {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 8px #10B981;
+            animation: pulse-dot 1.8s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0 1.5rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 2rem;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .user-pill {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-subtle);
+            padding: 0.4rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-highlight);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 580px;
+            padding: 1.75rem;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlide 0.25s ease-out;
+        }
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(12px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .url-box {
+            background: #060911;
+            border: 1px solid var(--border-subtle);
+            padding: 0.85rem;
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #38bdf8;
+            word-break: break-all;
+            margin: 1rem 0;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.88rem;
+        }
+        .meta-label {
+            color: var(--text-secondary);
+        }
+        .meta-val {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-subtle);
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: toastIn 0.25s ease-out;
+        }
+        @keyframes toastIn {
+            from { transform: translateX(30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .filter-pill {
+            cursor: pointer;
+            padding: 0.4rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+        }
+        .filter-pill.active {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: #a5b4fc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Navigation Bar -->
+    <header class="nav-bar">
+        <a href="#" class="header-brand">
+            <div class="logo-icon">
+                <i class="fa-solid fa-cloud-bolt"></i>
+            </div>
+            <div>
+                <div class="logo-text">Cloud Storage Vault</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">AWS S3 &amp; IAM Object Storage Engine</div>
+            </div>
+        </a>
+        <div class="nav-right">
+            <div class="badge-live-demo">
+                <div class="live-dot"></div>
+                <span>AWS S3 Mode: ACTIVE</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="openArchModal()">
+                <i class="fa-solid fa-diagram-project"></i> Architecture
+            </button>
+            <div class="user-pill">
+                <i class="fa-solid fa-user-shield text-cyan-400"></i>
+                <span>Gautham R (Admin)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Header Hero Banner -->
+    <div class="dashboard-header" style="margin-bottom: 2rem;">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">
+                Cloud Storage <span class="gradient-text">Management System</span>
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 1rem; max-width: 720px;">
+                Production-ready file management application on <strong>AWS S3</strong> with automated PBKDF2 user isolation, 
+                collision-free UUID key sanitization, server-side encryption (SSE-S3), and temporary presigned URL streaming.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button class="btn btn-secondary" onclick="toggleEngine()" id="btn-toggle-engine">
+                <i class="fa-solid fa-repeat"></i> Toggle Engine: <strong id="lbl-engine">AWS S3</strong>
+            </button>
+            <a href="#upload-section" class="btn btn-primary">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+            </a>
+        </div>
+    </div>
+
+    <!-- Metrics Cards Grid -->
+    <div class="stats-grid" style="margin-bottom: 2.5rem;">
+        <div class="stat-card">
+            <div class="stat-icon-wrapper stat-icon-primary">
+                <i class="fa-solid fa-file-shield"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Total Files Stored</div>
+                <div class="stat-value" id="stat-files-count">5 Files</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper stat-icon-cyan">
+                <i class="fa-solid fa-database"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Storage Consumed</div>
+                <div class="stat-value" id="stat-storage-size">19.3 MB</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper stat-icon-emerald">
+                <i class="fa-brands fa-aws"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Target S3 Bucket</div>
+                <div class="stat-value" style="font-size: 1.15rem; font-family: 'JetBrains Mono', monospace;">cloud-storage-vault</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon-wrapper stat-icon-amber">
+                <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Quota Usage (1 GB Cap)</div>
+                <div class="stat-value" id="stat-quota-pct">1.9%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div id="upload-section" class="card" style="margin-bottom: 2.5rem; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div>
+                <h2 style="font-size: 1.35rem; margin-bottom: 0.25rem;">
+                    <i class="fa-solid fa-upload text-cyan-400"></i> Interactive Drag &amp; Drop S3 Upload
+                </h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Upload any document or image. The system sanitizes the key, sets SSE-S3 encryption headers, and persists metadata.
+                </p>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+                Max limit: <strong>16 MB / file</strong>
+            </div>
+        </div>
+
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="drop-zone-icon">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div class="drop-zone-text">
+                Drag and drop your file here, or <span style="color: var(--primary); text-decoration: underline;">Browse Files</span>
+            </div>
+            <div class="drop-zone-sub">
+                Supported: PDF, PNG, JPG, DOCX, ZIP, CSV, TXT (Auto-UUID sanitized)
+            </div>
+            <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+
+        <!-- Animated Progress Bar -->
+        <div id="upload-progress-container" style="display: none; margin-top: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem;">
+                <span id="progress-filename" style="font-weight: 600; color: var(--text-primary);">Uploading...</span>
+                <span id="progress-pct" style="color: var(--secondary); font-weight: 700;">0%</span>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.08); height: 8px; border-radius: 999px; overflow: hidden;">
+                <div id="progress-bar-fill" style="background: var(--accent-gradient); width: 0%; height: 100%; transition: width 0.15s ease-out;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Management Table Section -->
+    <div class="card" style="padding: 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="font-size: 1.35rem; margin-bottom: 0.25rem;">
+                    <i class="fa-solid fa-folder-tree text-primary"></i> Stored Objects Registry
+                </h2>
+                <p style="color: var(--text-secondary); font-size: 0.88rem;">
+                    Files currently persisted across S3 with presigned URL streaming and access control.
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="filter-container">
+                <button class="filter-pill active" onclick="setFilter('all')">All Files</button>
+                <button class="filter-pill" onclick="setFilter('pdf')">PDF Documents</button>
+                <button class="filter-pill" onclick="setFilter('image')">Images</button>
+                <button class="filter-pill" onclick="setFilter('data')">Data &amp; Code</button>
+                <button class="filter-pill" onclick="setFilter('archive')">Archives</button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div style="margin-bottom: 1rem; position: relative;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 13px; color: var(--text-muted);"></i>
+            <input type="text" id="search-input" onkeyup="filterTable()" placeholder="Search stored files by name or UUID..." 
+                   class="form-control" style="padding-left: 38px; width: 100%;">
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table" id="files-table">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>S3 Object Key (UUID)</th>
+                        <th>Size</th>
+                        <th>Storage Mode</th>
+                        <th>Upload Date</th>
+                        <th style="text-align: right;">Cloud Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="files-tbody">
+                    <!-- Populated dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Presigned URL Modal -->
+<div class="modal-overlay" id="presigned-modal">
+    <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-key text-cyan-400"></i> S3 Presigned URL Generated
+            </h3>
+            <button onclick="closeModal('presigned-modal')" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.5rem;">
+            This temporary URL provides time-bounded access directly to Amazon S3 via signature v4 authentication.
+        </p>
+
+        <div class="url-box" id="presigned-url-text">Generating...</div>
+
+        <div class="meta-row">
+            <span class="meta-label">Expires In</span>
+            <span class="meta-val" style="color: #34d399;" id="timer-display">3600 seconds (60 mins)</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-label">Permission</span>
+            <span class="meta-val">s3:GetObject (Read Only)</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-label">Signature Version</span>
+            <span class="meta-val">AWS4-HMAC-SHA256</span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="copyPresignedUrl()">
+                <i class="fa-regular fa-copy"></i> Copy Link
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openSimulatedStream()">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Test Stream
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Metadata Inspector Modal -->
+<div class="modal-overlay" id="meta-modal">
+    <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-circle-info text-primary"></i> S3 Object Metadata
+            </h3>
+            <button onclick="closeModal('meta-modal')" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        <div style="margin-top: 1.25rem;" id="meta-details-body">
+            <!-- Injected by JS -->
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="closeModal('meta-modal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Architecture Diagram Modal -->
+<div class="modal-overlay" id="arch-modal">
+    <div class="modal-box" style="max-width: 680px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.25rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-diagram-project text-cyan-400"></i> Cloud Storage Architecture Flow
+            </h3>
+            <button onclick="closeModal('arch-modal')" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        <div style="margin: 1.25rem 0; background: #060911; border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: 12px; font-size: 0.82rem; font-family: monospace; color: #cbd5e1; line-height: 1.5;">
+┌────────────────┐      HTTPS Upload (POST)      ┌─────────────────────────────┐<br>
+│  User Browser  │ ────────────────────────────&gt; │  Flask App / API Service    │<br>
+└────────────────┘                               └──────────────┬──────────────┘<br>
+        ▲                                                       │<br>
+        │ Direct Binary Stream (302 Redirect)                   │ Boto3 S3 SDK<br>
+        ▼                                                       ▼<br>
+┌──────────────────────────────────────────────────────────────────────────────┐<br>
+│              Amazon Web Services (AWS) S3 Object Storage                     │<br>
+│  • Bucket: cloud-storage-vault-prod      • Server-Side Encryption: SSE-S3    │<br>
+│  • Presigned URL SigV4 (60m TTL)         • Least-Privilege IAM User Policy   │<br>
+└──────────────────────────────────────────────────────────────────────────────┘
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">
+            The application abstracts physical binary storage from business metadata. Large binary files stream directly to Amazon S3 using temporary presigned URLs to prevent web server bottlenecks, while object records are indexed in the relational database.
+        </p>
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button class="btn btn-primary btn-sm" onclick="closeModal('arch-modal')">Understood</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// Mock initial files persisted in S3
+let activeEngine = 'AWS S3';
+let currentFilter = 'all';
+
+let filesData = [
+    {
+        id: '1',
+        name: 'aws_well_architected_framework.pdf',
+        category: 'pdf',
+        uuidKey: 'f94a2b10_aws_well_architected.pdf',
+        sizeBytes: 4404019,
+        sizeDisplay: '4.2 MB',
+        date: '2026-10-12 10:14',
+        mode: 'AWS S3',
+        etag: '"9b10a4c138e7270a0b9e"',
+        mime: 'application/pdf'
+    },
+    {
+        id: '2',
+        name: 'vpc_peering_network_topology.png',
+        category: 'image',
+        uuidKey: 'e31b87a0_vpc_topology.png',
+        sizeBytes: 1887436,
+        sizeDisplay: '1.8 MB',
+        date: '2026-10-13 14:22',
+        mode: 'AWS S3',
+        etag: '"c45b89a718e2270d1a4e"',
+        mime: 'image/png'
+    },
+    {
+        id: '3',
+        name: 'docker_compose_production.zip',
+        category: 'archive',
+        uuidKey: 'a17cd890_docker_prod.zip',
+        sizeBytes: 13002342,
+        sizeDisplay: '12.4 MB',
+        date: '2026-10-14 09:45',
+        mode: 'AWS S3',
+        etag: '"d78a99e018e2270f2b3c"',
+        mime: 'application/zip'
+    },
+    {
+        id: '4',
+        name: 'cloudwatch_metrics_export_2026.csv',
+        category: 'data',
+        uuidKey: 'c82ef910_cw_metrics.csv',
+        sizeBytes: 870400,
+        sizeDisplay: '850 KB',
+        date: '2026-10-14 16:30',
+        mode: 'AWS S3',
+        etag: '"1e99a8b218e2270a5f8d"',
+        mime: 'text/csv'
+    },
+    {
+        id: '5',
+        name: 'iam_least_privilege_policies.json',
+        category: 'data',
+        uuidKey: 'b45ac110_iam_policies.json',
+        sizeBytes: 46080,
+        sizeDisplay: '45 KB',
+        date: '2026-10-15 11:05',
+        mode: 'AWS S3',
+        etag: '"8f77d3b118e2270c9a1a"',
+        mime: 'application/json'
+    }
+];
+
+function renderTable() {
+    const tbody = document.getElementById('files-tbody');
+    tbody.innerHTML = '';
+
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+    const filtered = filesData.filter(f => {
+        const matchesCategory = (currentFilter === 'all') || (f.category === currentFilter);
+        const matchesSearch = f.name.toLowerCase().includes(searchTerm) || f.uuidKey.toLowerCase().includes(searchTerm);
+        return matchesCategory && matchesSearch;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No matching files found.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(file => {
+        let iconClass = 'fa-file';
+        if (file.category === 'pdf') iconClass = 'fa-file-pdf text-rose-400';
+        else if (file.category === 'image') iconClass = 'fa-file-image text-cyan-400';
+        else if (file.category === 'archive') iconClass = 'fa-file-zipper text-amber-400';
+        else if (file.category === 'data') iconClass = 'fa-file-csv text-emerald-400';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <i class="fa-solid ${iconClass}" style="font-size: 1.15rem;"></i>
+                    <strong style="color: var(--text-primary); font-size: 0.9rem;">${file.name}</strong>
+                </div>
+            </td>
+            <td><code style="font-size: 0.78rem; color: #94a3b8;">${file.uuidKey}</code></td>
+            <td><span style="font-size: 0.85rem; color: var(--text-secondary);">${file.sizeDisplay}</span></td>
+            <td>
+                <span class="badge ${file.mode === 'AWS S3' ? 'badge-success' : 'badge-primary'}" style="font-size: 0.72rem;">
+                    <i class="${file.mode === 'AWS S3' ? 'fa-brands fa-aws' : 'fa-solid fa-hard-drive'}"></i> ${file.mode}
+                </span>
+            </td>
+            <td style="font-size: 0.82rem; color: var(--text-muted);">${file.date}</td>
+            <td style="text-align: right;">
+                <div style="display: inline-flex; gap: 0.4rem;">
+                    <button class="btn btn-secondary btn-sm" onclick="generatePresignedUrl('${file.id}')" title="Generate AWS S3 Presigned URL">
+                        <i class="fa-solid fa-key text-cyan-400"></i> Presigned URL
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="inspectMeta('${file.id}')" title="Inspect S3 Object Metadata">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="deleteFile('${file.id}')" style="color: #f87171;" title="Delete Object">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    updateMetrics();
+}
+
+function updateMetrics() {
+    document.getElementById('stat-files-count').textContent = `${filesData.length} Files`;
+    const totalBytes = filesData.reduce((acc, f) => acc + f.sizeBytes, 0);
+    const mb = (totalBytes / (1024 * 1024)).toFixed(1);
+    document.getElementById('stat-storage-size').textContent = `${mb} MB`;
+    const quotaPct = ((totalBytes / (1024 * 1024 * 1024)) * 100).toFixed(1);
+    document.getElementById('stat-quota-pct').textContent = `${quotaPct}%`;
+}
+
+function setFilter(cat) {
+    currentFilter = cat;
+    document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    renderTable();
+}
+
+function filterTable() {
+    renderTable();
+}
+
+function toggleEngine() {
+    activeEngine = (activeEngine === 'AWS S3') ? 'Local Storage' : 'AWS S3';
+    document.getElementById('lbl-engine').textContent = activeEngine;
+    filesData.forEach(f => f.mode = activeEngine);
+    renderTable();
+    showToast(`Storage engine switched to ${activeEngine}`);
+}
+
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 16 * 1024 * 1024) {
+        showToast('Error: File exceeds 16 MB limit!', 'danger');
+        return;
+    }
+
+    const progressContainer = document.getElementById('upload-progress-container');
+    const progressBar = document.getElementById('progress-bar-fill');
+    const progressFilename = document.getElementById('progress-filename');
+    const progressPct = document.getElementById('progress-pct');
+
+    progressContainer.style.display = 'block';
+    progressFilename.textContent = `Uploading ${file.name} to S3 Bucket...`;
+    progressBar.style.width = '0%';
+    progressPct.textContent = '0%';
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 20;
+        progressBar.style.width = progress + '%';
+        progressPct.textContent = progress + '%';
+
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+
+                // Categorize
+                let cat = 'data';
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (['pdf'].includes(ext)) cat = 'pdf';
+                else if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) cat = 'image';
+                else if (['zip', 'tar', 'gz'].includes(ext)) cat = 'archive';
+
+                const uuidStr = Math.random().toString(36).substring(2, 10);
+                const sizeDisplay = file.size > 1024 * 1024 ? (file.size / (1024*1024)).toFixed(1) + ' MB' : (file.size / 1024).toFixed(0) + ' KB';
+
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 5);
+
+                filesData.unshift({
+                    id: String(Date.now()),
+                    name: file.name,
+                    category: cat,
+                    uuidKey: `${uuidStr}_${file.name}`,
+                    sizeBytes: file.size,
+                    sizeDisplay: sizeDisplay,
+                    date: dateStr,
+                    mode: activeEngine,
+                    etag: `"${Math.random().toString(36).substring(2, 18)}"`,
+                    mime: file.type || 'application/octet-stream'
+                });
+
+                renderTable();
+                showToast(`Successfully uploaded ${file.name} with SSE-S3 encryption!`);
+            }, 300);
+        }
+    }, 120);
+}
+
+function generatePresignedUrl(id) {
+    const file = filesData.find(f => f.id === id);
+    if (!file) return;
+
+    const mockUrl = `https://cloud-storage-vault.s3.us-east-1.amazonaws.com/${file.uuidKey}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20261015%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261015T120000Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=8f9a2c3b8e7...`;
+
+    document.getElementById('presigned-url-text').textContent = mockUrl;
+    document.getElementById('presigned-modal').classList.add('active');
+}
+
+function copyPresignedUrl() {
+    const text = document.getElementById('presigned-url-text').textContent;
+    navigator.clipboard.writeText(text);
+    showToast('Presigned S3 URL copied to clipboard!');
+}
+
+function openSimulatedStream() {
+    showToast('Simulating secure direct binary stream from Amazon S3...');
+}
+
+function inspectMeta(id) {
+    const file = filesData.find(f => f.id === id);
+    if (!file) return;
+
+    const body = document.getElementById('meta-details-body');
+    body.innerHTML = `
+        <div class="meta-row"><span class="meta-label">Original Filename</span><span class="meta-val">${file.name}</span></div>
+        <div class="meta-row"><span class="meta-label">S3 Object Key</span><span class="meta-val">${file.uuidKey}</span></div>
+        <div class="meta-row"><span class="meta-label">S3 Bucket Name</span><span class="meta-val">cloud-storage-vault-prod</span></div>
+        <div class="meta-row"><span class="meta-label">Content-Type</span><span class="meta-val">${file.mime}</span></div>
+        <div class="meta-row"><span class="meta-label">Server-Side Encryption</span><span class="meta-val" style="color: #34d399;">AES-256 (SSE-S3)</span></div>
+        <div class="meta-row"><span class="meta-label">ETag Hash</span><span class="meta-val">${file.etag}</span></div>
+        <div class="meta-row"><span class="meta-label">Storage Class</span><span class="meta-val">STANDARD</span></div>
+        <div class="meta-row"><span class="meta-label">Owner IAM Identity</span><span class="meta-val">arn:aws:iam::123456789012:user/gautham</span></div>
+    `;
+    document.getElementById('meta-modal').classList.add('active');
+}
+
+function deleteFile(id) {
+    const idx = filesData.findIndex(f => f.id === id);
+    if (idx === -1) return;
+    const name = filesData[idx].name;
+    if (confirm(`Are you sure you want to delete "${name}" from S3?`)) {
+        filesData.splice(idx, 1);
+        renderTable();
+        showToast(`Deleted ${name} from storage.`);
+    }
+}
+
+function openArchModal() {
+    document.getElementById('arch-modal').classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<i class="fa-solid fa-circle-check text-cyan-400"></i> <span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3200);
+}
+
+// Drag & drop handlers
+const dropZone = document.getElementById('drop-zone');
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--primary)';
+        dropZone.style.background = 'rgba(99, 102, 241, 0.08)';
+    });
+});
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--border-subtle)';
+        dropZone.style.background = 'transparent';
+    });
+});
+dropZone.addEventListener('drop', (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        handleFileSelect({ target: { files: files } });
+    }
+});
+
+// Initial Render
+renderTable();
+</script>
+</body>
+</html>
